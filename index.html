@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f8fc">
+<title>Chat AI</title>
+<style>
+:root{color-scheme:light;--bg:#f6f8fc;--panel:#fff;--ink:#172033;--muted:#68758b;--line:#e2e8f2;--blue:#2563eb;--blue2:#1d4ed8;--soft:#edf4ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.app{min-height:100dvh;display:flex;flex-direction:column;max-width:980px;margin:auto;padding:12px;gap:12px}
+header{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 14px #17203308}
+.logo{width:44px;height:44px;border-radius:14px;background:var(--soft);display:grid;place-items:center;font-size:24px}
+.brand{flex:1}.brand h1{font-size:20px;line-height:1.2;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.status{font-size:12px;color:#16804a;background:#e9f9ef;border-radius:30px;padding:5px 9px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:220px 1fr;gap:12px;flex:1;min-height:0}
+aside,.chat{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+aside{padding:16px;height:max-content}aside h2{font-size:14px;margin:0 0 10px}aside p{color:var(--muted);font-size:13px;margin:0 0 12px}
+.newchat{width:100%;border:1px solid #cbd9f5;background:var(--soft);color:var(--blue2);border-radius:10px;padding:10px;font-weight:650}
+.history-title{margin-top:18px!important}.history{display:flex;flex-direction:column;gap:6px}.history button{border:0;background:transparent;text-align:left;padding:9px;border-radius:9px;color:var(--ink);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.history button.active,.history button:hover{background:#f0f5ff}
+.chat{display:flex;flex-direction:column;min-height:65vh}.messages{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:18px}
+.welcome{margin:auto;text-align:center;max-width:440px;padding:24px 8px}.welcome .big{font-size:42px}.welcome h2{margin:8px 0;font-size:23px}.welcome p{color:var(--muted);margin:0 0 16px}
+.suggestions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.suggestions button{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 11px;color:#34425b}
+.msg{display:flex;gap:9px;align-items:flex-start;max-width:100%}.msg.user{justify-content:flex-end}.avatar{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--soft);flex-shrink:0}.bubble{max-width:min(90%,680px);padding:12px 14px;border-radius:15px;background:#f0f3f8;overflow-wrap:anywhere;white-space:pre-wrap}.user .bubble{background:var(--blue);color:white;border-bottom-right-radius:5px}.assistant .bubble{border-bottom-left-radius:5px}.bubble pre{white-space:pre;overflow:auto;background:#172033;color:#eaf1ff;padding:12px;border-radius:10px;font-size:13px}.bubble code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.92em}.bubble p{margin:0 0 9px}.bubble p:last-child{margin-bottom:0}.bubble a{color:inherit}
+.composer{border-top:1px solid var(--line);padding:12px;display:flex;gap:9px;align-items:flex-end;background:#fff}.composer textarea{flex:1;resize:none;min-height:46px;max-height:140px;border:1px solid #d7dfeb;border-radius:14px;padding:12px;font:inherit;outline:none;background:#fff;color:var(--ink)}.composer textarea:focus{border-color:#83a9ff;box-shadow:0 0 0 3px #2563eb15}
+.send{border:0;border-radius:13px;background:var(--blue);color:white;font-weight:650;padding:12px 15px;min-height:46px}.send:disabled{opacity:.5}.foot{font-size:11px;color:var(--muted);text-align:center;padding:0 8px 4px}
+@media(max-width:680px){.app{padding:8px;gap:8px}header{padding:12px}.brand h1{font-size:18px}.brand p{font-size:12px}.status{display:none}.layout{display:flex;flex-direction:column}.layout aside{order:2;padding:10px}.layout aside p,.history-title,.history{display:none!important}.chat{min-height:70dvh;flex:1}.messages{padding:13px}.welcome h2{font-size:20px}.bubble{max-width:calc(100% - 4px)}.composer{padding:9px}.send{padding:11px 12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">🤖</div><div class="brand"><h1>Chat AI</h1><p>Tanya apa saja, belajar, dan bantu coding</p></div><div class="status" id="status">● Memeriksa server</div></header>
+<div class="layout">
+<aside><button class="newchat" id="newChat">＋ Chat baru</button><h2 class="history-title">Riwayat chat</h2><div class="history" id="history"></div><p style="margin-top:16px">Riwayat disimpan di browser perangkat ini.</p></aside>
+<section class="chat"><div class="messages" id="messages"><div class="welcome" id="welcome"><div class="big">✨</div><h2>Ada yang bisa kubantu?</h2><p>Tanyakan sesuatu atau mulai membuat proyek coding.</p><div class="suggestions"><button data-prompt="Buatkan game sederhana menggunakan HTML dan JavaScript.">Buat game HTML</button><button data-prompt="Jelaskan JavaScript untuk pemula.">Belajar JavaScript</button><button data-prompt="Bantu aku memperbaiki kode yang error.">Perbaiki kode</button></div></div></div>
+<form class="composer" id="form"><textarea id="input" rows="1" maxlength="12000" placeholder="Tulis pertanyaanmu..." aria-label="Pertanyaan"></textarea><button class="send" id="send" type="submit">Kirim ➤</button></form></section>
+</div>
+<div class="foot">Jawaban AI bisa keliru. Jangan masukkan kata sandi atau informasi pribadi sensitif.</div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const STORE = "chat-ai-history-v1";
+let chats = loadChats(), currentId = null, busy = false;
+function loadChats(){try{return JSON.parse(localStorage.getItem(STORE)||"[]")}catch{return []}}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(chats))}catch{setStatus("Penyimpanan penuh")}}
+function setStatus(s){$("status").textContent=s}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function newChat(){const c={id:newId(),title:"Chat baru",messages:[],updated:Date.now()};chats.unshift(c);currentId=c.id;save();renderAll()}
+function current(){return chats.find(c=>c.id===currentId)}
+function renderHistory(){const box=$("history");box.replaceChildren();chats.slice(0,30).forEach(c=>{const b=document.createElement("button");b.textContent=c.title||"Chat baru";b.className=c.id===currentId?"active":"";b.onclick=()=>{currentId=c.id;renderAll()};box.append(b)})}
+function renderAll(){renderHistory();renderMessages()}
+function renderMessages(){
+ const box=$("messages");box.replaceChildren();const c=current();
+ if(!c||!c.messages.length){const w=document.createElement("div");w.className="welcome";w.id="welcome";w.innerHTML='<div class="big">✨</div><h2>Ada yang bisa kubantu?</h2><p>Tanyakan sesuatu atau mulai membuat proyek coding.</p><div class="suggestions"><button data-prompt="Buatkan game sederhana menggunakan HTML dan JavaScript.">Buat game HTML</button><button data-prompt="Jelaskan JavaScript untuk pemula.">Belajar JavaScript</button><button data-prompt="Bantu aku memperbaiki kode yang error.">Perbaiki kode</button></div>';box.append(w);return}
+ c.messages.forEach(m=>addBubble(m.role,m.content,box));box.scrollTop=box.scrollHeight;
+}
+function addBubble(role,content,box=$("messages")){
+ const row=document.createElement("div");row.className="msg "+role;
+ if(role==="assistant"){const av=document.createElement("div");av.className="avatar";av.textContent="🤖";row.append(av)}
+ const b=document.createElement("div");b.className="bubble";b.textContent=content;row.append(b);box.append(row);return b;
+}
+// Safe minimal Markdown rendering: escapes HTML first, then formats code blocks, inline code and basic emphasis.
+function renderText(el,text){
+ let s=text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+ s=s.replace(/```([\w-]*)\n?([\s\S]*?)```/g,(_,lang,code)=>'<pre><code>'+code+'</code></pre>');
+ s=s.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+ s=s.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+ s=s.split(/\n{2,}/).map(part=>part.startsWith("<pre>")?part:'<p>'+part.replace(/\n/g,"<br>")+'</p>').join("");
+ el.innerHTML=s;
+}
+$("messages").addEventListener("click",e=>{const b=e.target.closest("[data-prompt]");if(b){$("input").value=b.dataset.prompt;$("input").focus()}});
+$("newChat").onclick=newChat;
+$("input").addEventListener("input",()=>{const t=$("input");t.style.height="auto";t.style.height=Math.min(t.scrollHeight,140)+"px"});
+$("input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("form").requestSubmit()}});
+$("form").addEventListener("submit",async e=>{
+ e.preventDefault();if(busy)return;
+ const text=$("input").value.trim();if(!text)return;
+ if(!current())newChat();
+ const c=current();c.messages.push({role:"user",content:text});if(c.messages.filter(m=>m.role==="user").length===1)c.title=text.slice(0,38)+(text.length>38?"…":"");c.updated=Date.now();save();
+ $("input").value="";$("input").style.height="auto";renderAll();busy=true;$("send").disabled=true;setStatus("● AI sedang menjawab");
+ const placeholder=addBubble("assistant","Sedang berpikir…");$("messages").scrollTop=$("messages").scrollHeight;
+ try{
+   const response=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:c.messages.slice(-30)})});
+   const data=await response.json();if(!response.ok)throw new Error(data.error||"Permintaan gagal");
+   c.messages.push({role:"assistant",content:data.reply});c.updated=Date.now();save();renderAll();
+ }catch(err){placeholder.textContent="Gagal: "+(err.message||"Tidak dapat terhubung ke server")+". Pastikan server aktif dan konfigurasi API benar."}
+ finally{busy=false;$("send").disabled=false;setStatus("● Siap");$("input").focus()}
+});
+async function health(){try{const r=await fetch("/api/health");const d=await r.json();setStatus(d.configured?"● AI siap":"● API belum diatur")}catch{setStatus("● Server tidak terhubung")}}
+health();if(chats.length){currentId=chats[0].id;renderAll()}else{newChat()}
+</script>
+</body>
+</html>
